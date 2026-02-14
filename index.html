@@ -1,0 +1,3204 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>♥ Para ti, Aradia ♥</title>
+    <meta name="description" content="Una experiencia especial de San Valentín para Aradia">
+    <style>
+        /* ============================================
+           IMPORTS & RESET
+           ============================================ */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ============================================
+           CSS VARIABLES
+           ============================================ */
+        :root {
+            --cyan: #00FFFF;
+            --cyan-glow: #00e5ff;
+            --cyan-dark: #008B8B;
+            --cyan-dim: rgba(0, 255, 255, 0.15);
+            --black: #000000;
+            --white: #ffffff;
+            --white-dim: rgba(255, 255, 255, 0.7);
+            --font-mono: 'Share Tech Mono', monospace;
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+        }
+
+        /* ============================================
+           BASE STYLES
+           ============================================ */
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--black);
+            color: var(--cyan);
+            font-family: var(--font-body);
+            cursor: none;
+        }
+
+        /* Custom cursor */
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--cyan);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.1s ease, opacity 0.3s ease;
+            mix-blend-mode: difference;
+        }
+
+        .custom-cursor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background: var(--cyan);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .cursor-trail {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.5;
+            transition: opacity 0.5s ease;
+        }
+
+        /* ============================================
+           MATRIX RAIN CANVAS
+           ============================================ */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* ============================================
+           FLOATING HEARTS PARTICLES
+           ============================================ */
+        .heart-particle {
+            position: fixed;
+            color: var(--cyan);
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 1;
+            animation: floatHeart linear infinite;
+            font-size: 12px;
+        }
+
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(100vh) rotate(0deg) scale(0.5);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.08;
+            }
+
+            90% {
+                opacity: 0.08;
+            }
+
+            100% {
+                transform: translateY(-10vh) rotate(360deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* ============================================
+           PHASE CONTAINERS
+           ============================================ */
+        .phase {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+            transition: opacity 0.8s ease;
+        }
+
+        .phase.hidden {
+            opacity: 0;
+            pointer-events: none;
+            display: none !important;
+            /* CRITICAL FIX: Prevent ghost clicks */
+        }
+
+        /* ============================================
+           PHASE 1 - LOADING SCREEN
+           ============================================ */
+        #phase-loading {
+            gap: 30px;
+        }
+
+        .loading-text {
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            color: var(--cyan);
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            animation: glitchText 3s infinite;
+            text-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan), 0 0 40px var(--cyan-dark);
+        }
+
+        /* Heart progress container */
+        .heart-progress-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .heart-outline {
+            font-size: 100px;
+            line-height: 1;
+            color: transparent;
+            -webkit-text-stroke: 2px var(--cyan);
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            position: relative;
+            filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.4));
+        }
+
+        .heart-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            overflow: hidden;
+            transition: height 0.3s ease;
+        }
+
+        .heart-fill-inner {
+            font-size: 100px;
+            line-height: 1;
+            color: var(--cyan);
+            text-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan), 0 0 60px var(--cyan-dark);
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .progress-percent {
+            position: absolute;
+            bottom: -35px;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            color: var(--cyan);
+            text-shadow: 0 0 10px var(--cyan);
+        }
+
+        /* Progress bar */
+        .progress-bar-container {
+            width: 280px;
+            height: 4px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-container::before,
+        .progress-bar-container::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            width: 6px;
+            height: 6px;
+            border: 1px solid var(--cyan);
+            transform: rotate(45deg);
+        }
+
+        .progress-bar-container::before {
+            left: -4px;
+        }
+
+        .progress-bar-container::after {
+            right: -4px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--cyan-dark), var(--cyan));
+            box-shadow: 0 0 10px var(--cyan), 0 0 20px rgba(0, 255, 255, 0.3);
+            transition: width 0.2s ease;
+            position: relative;
+        }
+
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -3px;
+            width: 2px;
+            height: 10px;
+            background: var(--cyan);
+            box-shadow: 0 0 8px var(--cyan);
+        }
+
+        /* Loading details text */
+        .loading-details {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: rgba(0, 255, 255, 0.4);
+            letter-spacing: 2px;
+            min-height: 20px;
+        }
+
+        /* ============================================
+           PHASE 2 - QUESTION SCREEN
+           ============================================ */
+        #phase-question {
+            gap: 25px;
+            padding: 20px;
+        }
+
+        .question-text {
+            font-family: var(--font-display);
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            color: var(--cyan);
+            text-align: center;
+            text-shadow: 0 0 15px var(--cyan), 0 0 30px rgba(0, 255, 255, 0.4);
+            max-width: 700px;
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadeInUp 1.5s ease forwards;
+            letter-spacing: 1px;
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Typewriter effect container */
+        .typewriter {
+            overflow: hidden;
+            border-right: 2px solid var(--cyan);
+            white-space: nowrap;
+            animation: fadeInUp 0.5s ease forwards, blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes blink-caret {
+
+            from,
+            to {
+                border-color: transparent;
+            }
+
+            50% {
+                border-color: var(--cyan);
+            }
+        }
+
+        /* Input container */
+        .input-container {
+            position: relative;
+            width: min(400px, 85vw);
+            opacity: 0;
+            animation: fadeInUp 1.5s ease 0.8s forwards;
+        }
+
+        .neon-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(0, 255, 255, 0.03);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            color: var(--cyan);
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
+            cursor: none;
+        }
+
+        .neon-input::placeholder {
+            color: rgba(0, 255, 255, 0.2);
+        }
+
+        .neon-input:focus {
+            border-color: var(--cyan);
+            background: rgba(0, 255, 255, 0.06);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2),
+                0 0 30px rgba(0, 255, 255, 0.1),
+                inset 0 0 15px rgba(0, 255, 255, 0.05);
+        }
+
+        .neon-input.typing {
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.35),
+                0 0 40px rgba(0, 255, 255, 0.15),
+                inset 0 0 20px rgba(0, 255, 255, 0.08);
+            border-color: var(--cyan-glow);
+        }
+
+        /* Shake animation for wrong answer */
+        .shake {
+            animation: shakeIt 0.5s ease;
+        }
+
+        @keyframes shakeIt {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-8px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(8px);
+            }
+        }
+
+        /* Submit button */
+        .submit-btn {
+            padding: 12px 40px;
+            background: transparent;
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            border-radius: 8px;
+            color: var(--cyan);
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: none;
+            transition: all 0.3s ease;
+            opacity: 0;
+            animation: fadeInUp 1.5s ease 1.2s forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3),
+                0 0 40px rgba(0, 255, 255, 0.15);
+            text-shadow: 0 0 10px var(--cyan);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* ============================================
+           AUDIO VOLUME CONTROL
+           ============================================ */
+        .volume-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(0, 255, 255, 0.25);
+            border-radius: 25px;
+            padding: 8px 14px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            opacity: 0.6;
+        }
+
+        .volume-control:hover {
+            opacity: 1;
+            border-color: rgba(0, 255, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.15);
+        }
+
+        .volume-btn {
+            background: none;
+            border: none;
+            color: var(--cyan);
+            font-size: 18px;
+            cursor: none;
+            padding: 0;
+            line-height: 1;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+
+        .volume-btn:hover {
+            text-shadow: 0 0 10px var(--cyan);
+            transform: scale(1.1);
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 80px;
+            height: 4px;
+            background: rgba(0, 255, 255, 0.15);
+            border-radius: 2px;
+            outline: none;
+            cursor: none;
+            transition: all 0.2s ease;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--cyan);
+            border-radius: 50%;
+            cursor: none;
+            box-shadow: 0 0 8px var(--cyan), 0 0 15px rgba(0, 255, 255, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 12px var(--cyan), 0 0 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: var(--cyan);
+            border-radius: 50%;
+            border: none;
+            cursor: none;
+            box-shadow: 0 0 8px var(--cyan), 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .volume-slider::-moz-range-track {
+            background: rgba(0, 255, 255, 0.15);
+            height: 4px;
+            border-radius: 2px;
+            border: none;
+        }
+
+        .volume-percent {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: rgba(0, 255, 255, 0.5);
+            min-width: 28px;
+            text-align: right;
+        }
+
+        /* Auto-play overlay */
+        .audio-start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10001;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            cursor: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .audio-start-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .audio-start-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            background: none;
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            border-radius: 16px;
+            padding: 30px 50px;
+            color: var(--cyan);
+            cursor: none;
+            transition: all 0.3s ease;
+            font-family: var(--font-display);
+        }
+
+        .audio-start-btn:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.2), 0 0 50px rgba(0, 255, 255, 0.1);
+            text-shadow: 0 0 15px var(--cyan);
+        }
+
+        .audio-start-btn .play-icon {
+            font-size: 40px;
+            animation: pulseGlow 2s ease infinite;
+        }
+
+        .audio-start-btn .play-label {
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 768px) {
+            .volume-control {
+                bottom: 12px;
+                right: 12px;
+                padding: 6px 10px;
+                gap: 6px;
+            }
+
+            .volume-slider {
+                width: 55px;
+            }
+
+            .volume-btn {
+                font-size: 16px;
+                cursor: auto;
+            }
+
+            .volume-slider {
+                cursor: auto;
+            }
+
+            .audio-start-btn {
+                cursor: auto;
+            }
+        }
+
+
+        /* Error message */
+        .error-msg {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: #ff4466;
+            text-shadow: 0 0 10px rgba(255, 68, 102, 0.4);
+            min-height: 25px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .error-msg.visible {
+            opacity: 1;
+        }
+
+        /* ============================================
+           PHASE 3 - SUCCESS
+           ============================================ */
+        #phase-success {
+            gap: 20px;
+        }
+
+        .success-text {
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 5vw, 3rem);
+            color: var(--cyan);
+            text-align: center;
+            text-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan), 0 0 60px var(--cyan-dark);
+            animation: pulseGlow 2s ease infinite;
+            transition: transform 1.2s cubic-bezier(0.55, 0, 1, 0.45), opacity 1.2s ease;
+        }
+
+        .success-sub {
+            font-family: var(--font-body);
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: var(--white-dim);
+            text-align: center;
+            animation: fadeInUp 1s ease 0.5s forwards;
+            opacity: 0;
+            transition: transform 1.2s cubic-bezier(0.55, 0, 1, 0.45), opacity 1.2s ease;
+        }
+
+        .success-heart {
+            font-size: 60px;
+            animation: heartbeat 1.2s ease infinite;
+            filter: drop-shadow(0 0 20px var(--cyan));
+            transition: transform 1.2s cubic-bezier(0.55, 0, 1, 0.45), opacity 1.2s ease;
+        }
+
+        /* Fly-out animations */
+        .fly-out-up {
+            transform: translateY(-120vh) rotate(-15deg) !important;
+            opacity: 0 !important;
+        }
+
+        .fly-out-left {
+            transform: translateX(-120vw) rotate(10deg) !important;
+            opacity: 0 !important;
+        }
+
+        .fly-out-right {
+            transform: translateX(120vw) rotate(-10deg) !important;
+            opacity: 0 !important;
+        }
+
+        /* ============================================
+           PHASE 4 - HEART CANVAS
+           ============================================ */
+        #phase-heart {
+            padding: 0;
+        }
+
+        #heartCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+        }
+
+        /* ============================================
+           PHASE 5 - STORY / FORTNITE
+           ============================================ */
+        #phase-story {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .story-line {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: clamp(16px, 3vw, 24px);
+            color: var(--cyan);
+            margin: 12px 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .story-line.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .story-fortnite-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(36px, 7vw, 72px);
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan), 0 0 80px rgba(0, 255, 255, 0.3);
+            margin: 20px 0;
+            opacity: 0;
+            transform: scale(0.3);
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            letter-spacing: 8px;
+        }
+
+        .story-fortnite-title.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .story-video-container {
+            margin: 20px auto;
+            max-width: 400px;
+            width: 90%;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--cyan);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3), 0 0 60px rgba(0, 255, 255, 0.1);
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .story-video-container.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .story-video-container video {
+            width: 100%;
+            display: block;
+        }
+
+        /* ============================================
+           PHASE 6 - VIVENCIAS / DEDICATORIA
+           ============================================ */
+        #phase-vivencias {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 30px 20px;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .viv-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: clamp(15px, 2.8vw, 22px);
+            color: var(--cyan);
+            margin: 10px 0;
+            opacity: 0;
+            transform: translateY(25px) scale(0.95);
+            transition: opacity 1s ease, transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            line-height: 1.5;
+        }
+
+        .viv-text.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .viv-text .highlight {
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan);
+        }
+
+        .viv-img-small {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            vertical-align: middle;
+            margin-left: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+
+        .viv-ascii-container {
+            width: 95%;
+            max-width: 500px;
+            margin: 20px auto;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            overflow: hidden;
+        }
+
+        .viv-ascii-container.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .viv-ascii-art {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: clamp(10px, 2.5vw, 18px);
+            line-height: 1.2;
+            color: var(--cyan);
+            white-space: pre;
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        .viv-ascii-art .ascii-char {
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+
+        .viv-ascii-art .ascii-char.show {
+            opacity: 1;
+        }
+
+        /* ============================================
+           PHASE 7 - RECAP MUSICAL
+           ============================================ */
+        #phase-recap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 20, 30, 0.95) 100%);
+        }
+
+        .recap-slide {
+            display: none;
+            /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .recap-slide.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        .recap-text-container {
+            margin-bottom: 30px;
+            min-height: 80px;
+        }
+
+        .recap-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: clamp(16px, 3vw, 24px);
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            margin: 10px 0;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .recap-text.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .recap-song-info {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--cyan);
+            font-size: 1.2em;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .recap-song-info.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .recap-art-frame {
+            position: relative;
+            padding: 10px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid var(--cyan);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+            opacity: 0;
+            transform: scale(0.8) rotate(2deg);
+            transition: opacity 1s ease, transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .recap-art-frame.visible {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+
+        .recap-art-img {
+            display: block;
+            width: 100%;
+            max-width: 280px;
+            border-radius: 10px;
+        }
+
+        .highlight-word {
+            color: var(--cyan);
+            font-weight: bold;
+        }
+
+
+        .viv-img-large {
+            display: block;
+            max-width: 350px;
+            width: 85%;
+            margin: 15px auto;
+            border-radius: 12px;
+            border: 2px solid var(--cyan);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3), 0 0 60px rgba(0, 255, 255, 0.1);
+            opacity: 0;
+            transform: scale(0.5) rotate(-3deg);
+            transition: opacity 1s ease, transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .viv-img-large.visible {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+
+        /* ============================================
+           PHASE 8 - FLORK & QUIZ CSS
+           ============================================ */
+        #phase-flork {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(180deg, #000 0%, #1a0b1a 100%);
+        }
+
+        .flork-segment {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            animation: fadeUp 0.8s ease forwards;
+        }
+
+        .flork-segment.visible {
+            display: flex;
+        }
+
+        .flork-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: clamp(18px, 3vw, 26px);
+            color: #fff;
+            margin: 15px 0;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+        .flork-media-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .flork-gif {
+            max-width: 150px;
+            border-radius: 10px;
+            border: 2px solid var(--cyan);
+            box-shadow: 0 0 10px var(--cyan);
+        }
+
+        .quiz-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .quiz-btn {
+            padding: 15px 30px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.2rem;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--cyan);
+            color: var(--cyan);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .quiz-btn:hover {
+            background: var(--cyan);
+            color: #000;
+            transform: scale(1.1);
+        }
+
+        .quiz-feedback {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .quiz-feedback.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .quiz-feedback img {
+            max-width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px red;
+            margin-bottom: 20px;
+        }
+
+        .quiz-feedback p {
+            font-family: 'Share Tech Mono', monospace;
+            color: red;
+            font-size: 2rem;
+            text-shadow: 0 0 10px red;
+        }
+
+        .next-phase-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 1s ease, background 0.3s ease, color 0.3s ease;
+            pointer-events: none;
+        }
+
+        .next-phase-btn.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .next-phase-btn:hover {
+            background: var(--cyan);
+            color: #000;
+        }
+
+        .admiration-list {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            width: 100%;
+            max-width: 600px;
+            text-align: left;
+        }
+
+        .admiration-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.8s ease;
+        }
+
+        .admiration-item.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .admiration-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.5rem;
+            color: #fff;
+            flex: 1;
+        }
+
+        .admiration-gif {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid var(--cyan);
+            box-shadow: 0 0 10px var(--cyan);
+        }
+
+        .special-quote {
+            font-size: 1.8rem;
+            color: var(--cyan);
+            text-shadow: 0 0 10px var(--cyan);
+            margin-top: 30px;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 1s ease;
+        }
+
+        .special-quote.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .naruto-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 100%;
+        }
+
+        .naruto-container.visible {
+            display: flex;
+        }
+
+        .naruto-text-big {
+            font-size: 4rem;
+            color: #ff9900;
+            /* Naruto orange */
+            font-weight: bold;
+            text-transform: uppercase;
+            text-shadow: 3px 3px 0 #000, 0 0 20px #ff9900;
+            margin: 20px 0;
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translate(1px, 1px) rotate(0deg);
+            }
+
+            10% {
+                transform: translate(-1px, -2px) rotate(-1deg);
+            }
+
+            20% {
+                transform: translate(-3px, 0px) rotate(1deg);
+            }
+
+            30% {
+                transform: translate(3px, 2px) rotate(0deg);
+            }
+
+            40% {
+                transform: translate(1px, -1px) rotate(1deg);
+            }
+
+            50% {
+                transform: translate(-1px, 2px) rotate(-1deg);
+            }
+
+            60% {
+                transform: translate(-3px, 1px) rotate(0deg);
+            }
+
+            70% {
+                transform: translate(3px, 1px) rotate(-1deg);
+            }
+
+            80% {
+                transform: translate(-1px, -1px) rotate(1deg);
+            }
+
+            90% {
+                transform: translate(1px, 2px) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(1px, -2px) rotate(-1deg);
+            }
+        }
+
+        .beauty-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            text-align: center;
+        }
+
+        .beauty-photos {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .beauty-img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            border: 3px solid #ff69b4;
+            box-shadow: 0 0 15px #ff69b4;
+            transform: rotate(-5deg);
+            transition: transform 0.3s ease;
+        }
+
+        .beauty-img:nth-child(2) {
+            transform: rotate(5deg);
+            border-color: #ff1493;
+        }
+
+        .beauty-img:hover {
+            transform: scale(1.1) rotate(0deg);
+            z-index: 10;
+        }
+
+        .claveles-text {
+            font-size: 3.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin: 20px 0;
+            background: linear-gradient(90deg, #ffffff 0%, #ffc0cb 50%, #ffffff 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shineText 3s linear infinite;
+        }
+
+        @keyframes shineText {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .collage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .collage-item {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .collage-item:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            box-shadow: 0 10px 20px rgba(135, 206, 235, 0.5);
+            /* Sky blue glow */
+        }
+
+        .landscape-img {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 0 30px #87ceeb;
+            margin: 20px 0;
+            animation: pulseGlow 5s infinite;
+        }
+
+        .melon-text {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #87ceeb;
+            /* Sky blue */
+            text-shadow: 0 0 10px #fff;
+            margin: 10px 0;
+        }
+
+        .flower-gif {
+            width: 120px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 192, 203, 0.5);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* FIX Phase 11 Scroll & Layout - ONLY when visible */
+        #phase-final:not(.hidden) {
+            justify-content: flex-start !important;
+            overflow-y: auto !important;
+            padding: 80px 0 40px 0;
+            height: 100vh;
+            display: flex;
+            /* Asegurar display */
+        }
+
+        #phase-final::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #phase-final::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        #phase-final::-webkit-scrollbar-thumb {
+            background: var(--cyan);
+            border-radius: 4px;
+        }
+
+        @keyframes heartbeat {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            15% {
+                transform: scale(1.15);
+            }
+
+            30% {
+                transform: scale(1);
+            }
+
+            45% {
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                text-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan);
+            }
+
+            50% {
+                text-shadow: 0 0 30px var(--cyan), 0 0 60px var(--cyan), 0 0 80px var(--cyan-dark);
+            }
+        }
+
+        /* ============================================
+           GLITCH EFFECT
+           ============================================ */
+        @keyframes glitchText {
+
+            0%,
+            93%,
+            100% {
+                text-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan);
+                transform: translate(0);
+            }
+
+            94% {
+                text-shadow: -2px 0 #ff0040, 2px 0 #00ff88;
+                transform: translate(-2px, 1px);
+            }
+
+            95% {
+                text-shadow: 2px 0 #ff0040, -2px 0 #00ff88;
+                transform: translate(2px, -1px);
+            }
+
+            96% {
+                text-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan);
+                transform: translate(0);
+            }
+
+            97% {
+                text-shadow: -1px 0 #ff0040, 1px 0 #00ff88;
+                transform: translate(1px, 1px) skewX(1deg);
+            }
+
+            98% {
+                text-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan);
+                transform: translate(0) skewX(0);
+            }
+        }
+
+        /* Scanline overlay */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.03) 2px,
+                    rgba(0, 0, 0, 0.03) 4px);
+        }
+
+        /* Vignette */
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 8;
+            background: radial-gradient(ellipse at center,
+                    transparent 50%,
+                    rgba(0, 0, 0, 0.5) 100%);
+        }
+
+        /* ============================================
+           DECORATIVE CORNERS
+           ============================================ */
+        .corner-decoration {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            border-color: rgba(0, 255, 255, 0.2);
+            border-style: solid;
+            z-index: 6;
+        }
+
+        .corner-tl {
+            top: 15px;
+            left: 15px;
+            border-width: 2px 0 0 2px;
+        }
+
+        .corner-tr {
+            top: 15px;
+            right: 15px;
+            border-width: 2px 2px 0 0;
+        }
+
+        .corner-bl {
+            bottom: 15px;
+            left: 15px;
+            border-width: 0 0 2px 2px;
+        }
+
+        .corner-br {
+            bottom: 15px;
+            right: 15px;
+            border-width: 0 2px 2px 0;
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 768px) {
+            .loading-text {
+                font-size: 1.1rem;
+                letter-spacing: 4px;
+            }
+
+            .heart-outline,
+            .heart-fill-inner {
+                font-size: 75px;
+            }
+
+            .heart-progress-container {
+                width: 90px;
+                height: 90px;
+            }
+
+            .progress-bar-container {
+                width: 220px;
+            }
+
+            .neon-input {
+                padding: 12px 15px;
+                font-size: 1rem;
+            }
+
+            .submit-btn {
+                padding: 10px 30px;
+                font-size: 0.85rem;
+            }
+
+
+
+            .corner-decoration {
+                width: 25px;
+                height: 25px;
+            }
+
+            .custom-cursor,
+            .cursor-trail {
+                display: none;
+            }
+
+            html,
+            body {
+                cursor: auto;
+            }
+
+            .neon-input,
+            .submit-btn {
+                cursor: auto;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .question-text {
+                font-size: 1rem;
+                line-height: 1.5;
+            }
+
+            .progress-bar-container {
+                width: 180px;
+            }
+        }
+
+        /* ============================================
+           TRANSITION FLASH
+           ============================================ */
+        .transition-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--cyan);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease;
+        }
+
+        .transition-flash.active {
+            opacity: 0.15;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Audio Start Overlay (needed for autoplay policy) -->
+    <div class="audio-start-overlay" id="audioStartOverlay">
+        <button class="audio-start-btn" id="audioStartBtn">
+            <span class="play-icon">♥</span>
+            <span class="play-label">Toca para iniciar</span>
+        </button>
+    </div>
+
+    <!-- Background Audio -->
+    <audio id="bgAudio" loop preload="auto">
+        <source src="audio/pista1.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Volume Control -->
+    <div class="volume-control" id="volumeControl">
+        <button class="volume-btn" id="volumeBtn" title="Mute/Unmute">🔊</button>
+        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
+        <span class="volume-percent" id="volumePercent">50%</span>
+    </div>
+
+    <!-- Matrix Rain Canvas -->
+    <canvas id="matrix-canvas"></canvas>
+
+    <!-- Overlay effects -->
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+
+    <!-- Corner decorations -->
+    <div class="corner-decoration corner-tl"></div>
+    <div class="corner-decoration corner-tr"></div>
+    <div class="corner-decoration corner-bl"></div>
+    <div class="corner-decoration corner-br"></div>
+
+    <!-- Custom cursor (desktop only) -->
+    <div class="custom-cursor" id="cursor"></div>
+
+    <!-- Transition flash -->
+    <div class="transition-flash" id="transitionFlash"></div>
+
+    <!-- ==========================================
+         PHASE 1 - LOADING
+         ========================================== -->
+    <div class="phase" id="phase-loading">
+        <div class="loading-text" id="loadingText">Cargando...</div>
+
+        <div class="heart-progress-container">
+            <div class="heart-outline">♥</div>
+            <div class="heart-fill" id="heartFill">
+                <div class="heart-fill-inner">♥</div>
+            </div>
+            <div class="progress-percent" id="progressPercent">0%</div>
+        </div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+
+        <div class="loading-details" id="loadingDetails"></div>
+    </div>
+
+    <!-- ==========================================
+         PHASE 2 - QUESTION
+         ========================================== -->
+    <div class="phase hidden" id="phase-question">
+        <h1 class="question-text" id="questionText"></h1>
+
+        <div class="input-container">
+            <input type="text" class="neon-input" id="answerInput" autocomplete="off" spellcheck="false" maxlength="30">
+        </div>
+
+        <div class="error-msg" id="errorMsg">Mmm... esa no es la respuesta 💔</div>
+
+        <button class="submit-btn" id="submitBtn" disabled>
+            Continuar →
+        </button>
+
+
+    </div>
+
+    <!-- ==========================================
+         PHASE 3 - SUCCESS
+         ========================================== -->
+    <div class="phase hidden" id="phase-success">
+        <div class="success-heart" id="successHeart">💖</div>
+        <h1 class="success-text" id="successText">¡Así es, mi compañerita! 💕</h1>
+        <p class="success-sub" id="successSub">Siempre serás mi compañerita... Te amo, Aradia ♥</p>
+    </div>
+
+    <!-- ==========================================
+         PHASE 4 - HEART WORD ART
+         ========================================== -->
+    <div class="phase hidden" id="phase-heart">
+        <canvas id="heartCanvas"></canvas>
+    </div>
+
+    <!-- ==========================================
+         PHASE 5 - STORY / FORTNITE
+         ========================================== -->
+    <div class="phase hidden" id="phase-story">
+        <p class="story-line" id="storyLine1">Todo empezó un día que nos conocimos...</p>
+        <p class="story-line" id="storyLine2">Y empezamos en el juego que me ha dado muchas cosas...</p>
+        <div class="story-fortnite-title" id="storyFortniteTitle">FORTNITE</div>
+        <div class="story-video-container" id="storyVideoContainer">
+            <video id="storyVideo" muted playsinline loop>
+                <source src="videos_y_gifs/Download.mp4" type="video/mp4">
+            </video>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         PHASE 6 - VIVENCIAS / DEDICATORIA
+         ========================================== -->
+    <div class="phase hidden" id="phase-vivencias">
+        <p class="viv-text" id="vivText1">Quién diría todas las vivencias que nos daría esa casualidad<span
+                class="sparkle-emoji">...</span> <span class="sparkle-emoji">✨</span></p>
+        <p class="viv-text" id="vivText2">Sin embargo<span class="sparkle-emoji">...</span> <img
+                src="videos_y_gifs/gato%20sticker.png" alt="gatito" class="viv-img-small"></p>
+        <p class="viv-text" id="vivText3">Este detalle no es solo para contar lo que ya sabemos <span
+                class="sparkle-emoji">💫</span></p>
+        <div class="viv-ascii-container" id="vivAsciiContainer">
+            <pre class="viv-ascii-art" id="vivAsciiArt"></pre>
+        </div>
+        <p class="viv-text" id="vivText4">Esto es para recordarte siempre <span class="highlight">QUIÉN TÚ ERES!</span>
+            y porque te aprecio tanto<span class="sparkle-emoji">...</span> <span class="sparkle-emoji">💖</span></p>
+        <img src="videos_y_gifs/michi-michillio.gif" alt="michi" class="viv-img-large" id="vivMichiImg">
+    </div>
+
+    <!-- ==========================================
+         PHASE 7 - RECAP MUSICAL
+         ========================================== -->
+    <div class="phase hidden" id="phase-recap">
+
+        <!-- Slide 1: Remy Zero -->
+        <div class="recap-slide" id="recapSlide1">
+            <div class="recap-text-container">
+                <p class="recap-text" id="rs1_t1">Para empezar hablemos un poco de la música que te gusta...</p>
+                <p class="recap-text" id="rs1_t2">Por ejemplo la linda canción que un día me dedicaste y te canté <span
+                        class="highlight-word">jejeje</span></p>
+                <p class="recap-text" id="rs1_t3">lindo estilo de música la que me compartes siempre ❤️</p>
+            </div>
+            <div class="recap-song-info" id="rs1_info">REMY ZERO - SAVE ME</div>
+            <div class="recap-art-frame" id="rs1_img">
+                <img src="videos_y_gifs/saveme.jpg" alt="Save Me" class="recap-art-img">
+            </div>
+        </div>
+
+        <!-- Slide 2: Humbe -->
+        <div class="recap-slide" id="recapSlide2">
+            <div class="recap-text-container">
+                <p class="recap-text" id="rs2_t1">Sin embargo conforme pasó el tiempo ⏳...</p>
+                <p class="recap-text" id="rs2_t2">me fuiste enseñando nuevos géneros musicales</p>
+                <p class="recap-text" id="rs2_t3">tanto así, que muchas veces me hiciste ver tu <span
+                        class="highlight-word">verdadero:</span></p>
+            </div>
+            <div class="recap-song-info" id="rs2_info">HUMBE - TU VALOR</div>
+            <div class="recap-art-frame" id="rs2_img">
+                <img src="videos_y_gifs/valor.jpg" alt="Tu Valor" class="recap-art-img">
+            </div>
+        </div>
+
+        <!-- Slide 3: PXNDX -->
+        <div class="recap-slide" id="recapSlide3">
+            <div class="recap-text-container">
+                <p class="recap-text" id="rs3_t1">Tú como siempre tan auténtica en todo lo relacionado al arte 🎨</p>
+                <p class="recap-text" id="rs3_t2">Pero por supuesto, como bien dicen.</p>
+                <p class="recap-text" id="rs3_t3">No es bueno olvidar nuestros orígenes y por <span
+                        class="highlight-word">eso...</span></p>
+            </div>
+            <div class="recap-song-info" id="rs3_info">Los Malaventurados No Lloran</div>
+            <div class="recap-art-frame" id="rs3_img">
+                <img src="videos_y_gifs/pandx.jpg" alt="PXNDX" class="recap-art-img">
+            </div>
+        </div>
+
+        <!-- Slide 4: Bad Bunny Yonaguni -->
+        <div class="recap-slide" id="recapSlide4">
+            <div class="recap-text-container">
+                <p class="recap-text" id="rs4_t1">Y bueno te robaré un poco de crédito de tus gustos musicales</p>
+                <p class="recap-text" id="rs4_t2">ya que siento que tuve un poco de influencia para cambiarlos... 😊</p>
+                <p class="recap-text" id="rs4_t3">lo que nos permitió escuchar esta canción y espero que <span
+                        class="highlight-word">podamos:</span></p>
+            </div>
+            <div class="recap-song-info" id="rs4_info">Bad Bunny - Yonaguni</div>
+            <div class="recap-art-frame" id="rs4_img">
+                <img src="videos_y_gifs/bad.jpg" alt="Yonaguni" class="recap-art-img">
+            </div>
+        </div>
+
+        <!-- Slide 5: Bad Bunny Baile Inolvidable (LOOP) -->
+        <div class="recap-slide" id="recapSlide5">
+            <div class="recap-text-container">
+                <p class="recap-text" id="rs5_t1">Qué lindos recuerdos vienen a la memoria con esa linda canción 🎵</p>
+                <p class="recap-text" id="rs5_t2">sin embargo, ese día puedo decir...</p>
+                <p class="recap-text" id="rs5_t3">que aunque yo sea un tronquito, tú siempre serás <span
+                        class="highlight-word">mi:</span></p>
+            </div>
+            <div class="recap-song-info" id="rs5_info">BAD BUNNY - BAILE INOLVIDABLE</div>
+            <div class="recap-art-frame" id="rs5_img">
+                <img src="videos_y_gifs/baile.jpg" alt="Baile Inolvidable" class="recap-art-img">
+            </div>
+            <button class="next-phase-btn" id="btnToPhase8">Continuar ➡</button>
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         PHASE 8 - FLORK & QUIZ
+         ========================================== -->
+    <div class="phase hidden" id="phase-flork">
+
+        <!-- Segment 1: Flork Facts -->
+        <div class="flork-segment" id="florkSeg1">
+            <p class="flork-text">Para que no se duerma jejejeje ahí le va...</p>
+            <p class="flork-text">un pequeño dato curioso ☝️🤓</p>
+            <p class="flork-text">que tal vez ya lo sabía, espero que no jsjsj</p>
+            <div style="margin: 30px 0;">
+                <p class="flork-text" style="font-size: 1.8em; color: var(--cyan);">SABIAS QUEEEEE....</p>
+                <p class="flork-text">el dibujito este que usa en stickers se llama <span
+                        class="highlight-word">FLORK</span></p>
+            </div>
+            <div class="flork-media-container">
+                <img src="videos_y_gifs/flork1.gif" alt="Flork" class="flork-gif">
+                <img src="videos_y_gifs/angry-doodle.gif" alt="Angry Doodle" class="flork-gif">
+            </div>
+            <button class="next-phase-btn visible" id="btnFlorkNext1">Siguiente ➡</button>
+        </div>
+
+        <!-- Segment 2: Quiz Valorant -->
+        <div class="flork-segment" id="florkSeg2">
+            <p class="flork-text">Vamos a hacer un pequeño quiz... 📝</p>
+            <p class="flork-text">¿Cuántos créditos cuesta el muro de Sage? 🧊</p>
+            <div class="flork-media-container">
+                <img src="videos_y_gifs/valorant-donowall.gif" class="flork-gif" style="max-width: 250px;">
+            </div>
+            <div class="quiz-options">
+                <button class="quiz-btn" id="btnQuiz350">350</button>
+                <button class="quiz-btn" id="btnQuiz500">500</button>
+                <button class="quiz-btn" id="btnQuiz400">400</button>
+            </div>
+        </div>
+
+        <!-- Segment 3: Celebration -->
+        <div class="flork-segment" id="florkSeg3">
+            <p class="flork-text" style="font-size: 1.5em;">¡Felicidades preciosa! 🎉</p>
+            <p class="flork-text">No esperaría menos jamás de la mejor Sage que conozco ❤️</p>
+            <div class="flork-media-container">
+                <img src="videos_y_gifs/using-power-sage.gif" class="flork-gif"
+                    style="max-width: 300px; border-color: #ff00ff;">
+            </div>
+            <button class="next-phase-btn visible" id="btnToPhase9">Continuar ➡</button>
+        </div>
+
+        <!-- Quiz Feedback Overlay -->
+        <div class="quiz-feedback" id="quizFeedback">
+            <img src="videos_y_gifs/cry-valorant.gif" alt="Cry">
+            <p>¡Vuelve a intentar! 😭</p>
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         PHASE 9 - ADMIRATION & NARUTO
+         ========================================== -->
+    <div class="phase hidden" id="phase-admiration">
+
+        <!-- Segment 1: List -->
+        <div class="flork-segment" id="admirationSeg1" style="display: flex;">
+            <h2 class="flork-text" style="color: var(--cyan); margin-bottom: 30px;">Cosas que admiro de ti...</h2>
+
+            <div class="admiration-list">
+                <!-- Item 1 -->
+                <div class="admiration-item" id="admItem1">
+                    <span class="admiration-text">1.- Tu fortaleza</span>
+                    <img src="videos_y_gifs/strong-cute.gif" class="admiration-gif">
+                </div>
+
+                <!-- Item 2 -->
+                <div class="admiration-item" id="admItem2">
+                    <span class="admiration-text">2.- Tu inteligencia</span>
+                    <img src="videos_y_gifs/ebichu-glasses.gif" class="admiration-gif">
+                </div>
+
+                <!-- Item 3 -->
+                <div class="admiration-item" id="admItem3">
+                    <span class="admiration-text">3.- Tu paciencia</span>
+                    <img src="videos_y_gifs/uhm-sock.gif" class="admiration-gif">
+                </div>
+            </div>
+
+            <div class="special-quote" id="admQuote">
+                Paciencia y buen humor ❤️
+            </div>
+
+            <button class="next-phase-btn visible" id="btnToNaruto" style="margin-top: 40px;">Siguiente ➡</button>
+        </div>
+
+        <!-- Segment 2: Naruto Surprise -->
+        <!-- Segment 2: Naruto Surprise -->
+        <div class="naruto-container" id="narutoSeg" style="display: none;">
+            <p class="flork-text" id="narutoText1" style="opacity: 0; transition: opacity 1s;">Créeme que me has
+                enseñado demasiadas cosas importantes...</p>
+            <p class="flork-text" id="narutoText2" style="opacity: 0; transition: opacity 1s;">te aprecio mucho por
+                hacer ese esfuerzo</p>
+
+            <div class="naruto-text-big" id="narutoBigText" style="opacity: 0;">¡DE VERAS!</div>
+
+            <img src="videos_y_gifs/naruto.gif" id="narutoGif"
+                style="max-width: 100%; border-radius: 15px; box-shadow: 0 0 20px #ff9900; opacity: 0;">
+
+            <button class="next-phase-btn visible" id="btnToPhase10" style="margin-top: 20px; display: none;">Continuar
+                ➡</button>
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         PHASE 10 - BEAUTY & CLAVELES
+         ========================================== -->
+    <div class="phase hidden" id="phase-beauty">
+
+        <!-- Segment 1: Beauty Photos -->
+        <div class="flork-segment" id="beautySeg1" style="display: flex;">
+            <p class="flork-text" style="font-size: 1.5rem; margin-bottom: 20px;">tu belleza me recuerda a la belleza de
+                ellas... ❤️❤️❤️</p>
+
+            <div class="beauty-photos">
+                <img src="videos_y_gifs/ara1.jpg" class="beauty-img">
+                <img src="videos_y_gifs/ara2.png" class="beauty-img">
+            </div>
+
+            <button class="next-phase-btn visible" id="btnToFlowers" style="margin-top: 40px; background: #ff69b4;">YA
+                SÉ QUE SOY BONITA, BOBO</button>
+        </div>
+
+        <!-- Segment 2: Flowers (Claveles) -->
+        <div class="flork-segment" id="flowersSeg" style="display: none;">
+            <div class="flower-bg"></div>
+
+            <div class="flower-gifs-container" style="margin-bottom: 20px;">
+                <span style="font-size: 3rem;">🌸🌺🌻🌹🌷</span>
+            </div>
+
+            <div class="claveles-text">CLAVELES</div>
+
+            <div class="flower-gifs-container">
+                <img src="videos_y_gifs/carnation-flower.gif" class="flower-gif" style="width: 150px;">
+                <img src="videos_y_gifs/flowers-animation.gif" class="flower-gif">
+                <img src="videos_y_gifs/букет.gif" class="flower-gif">
+            </div>
+
+            <button class="next-phase-btn visible" id="btnToFinal"
+                style="margin-top: 20px; background: #87ceeb; color: #333;">Siguiente ➡</button>
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         PHASE 11 - COLLAGE & FINAL CELESTE
+         ========================================== -->
+    <div class="phase hidden" id="phase-final">
+
+        <!-- Segment 1: Collage -->
+        <div class="flork-segment" id="collageSeg" style="width: 95%; max-width: 1200px;">
+            <p class="flork-text" style="font-size: 1.2rem; margin-bottom: 30px;">
+                PERO BUENO QUERIDA MIA...<br>
+                HAY TANTAS COSAS QUE TE HACEN LO PERFECTA QUE ERES, ESTARÍAMOS AQUÍ TODA UNA VIDA.<br>
+                Y TODAS LAS COSAS QUE ME FALTAN CONOCER DE TI, A TU LADO.<br>
+                ESPERO QUE TÚ Y LA VIDA ME LO PERMITAN.<br>
+                ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+            </p>
+
+            <div class="collage-grid">
+                <!-- 22 Images/GIFs from collage folder -->
+                <img src="collage/actividades.gif" class="collage-item">
+                <img src="collage/book-cat.gif" class="collage-item">
+                <img src="collage/but-i’m-not-original.gif" class="collage-item">
+                <img src="collage/cigarros-mentolados_.jpg" class="collage-item">
+                <img src="collage/drawing-gifs-art-gifs.gif" class="collage-item">
+                <img src="collage/fortnite-jonesy.gif" class="collage-item">
+                <img src="collage/ggmeow-cooking.gif" class="collage-item">
+                <img src="collage/hqdefault.jpg" class="collage-item">
+                <img src="collage/m_5add5230fcdc31be756ae208.jpg" class="collage-item">
+                <img src="collage/me-at-the-gym-the-rock-20.gif" class="collage-item">
+                <img src="collage/owl-sleeping.gif" class="collage-item">
+                <img src="collage/peach-cat-mochi-peach-cat.gif" class="collage-item">
+                <img src="collage/s-l400.jpg" class="collage-item">
+                <img src="collage/sewing-sewing-machine.gif" class="collage-item">
+                <img src="collage/sewing-stitching.gif" class="collage-item">
+                <img src="collage/sseeyall-bubu-dudu.gif" class="collage-item">
+                <img src="collage/stream-promote-sp.gif" class="collage-item">
+                <img src="collage/uncanny-cat-gdmi.gif" class="collage-item">
+                <img src="collage/valorant-reyna.gif" class="collage-item">
+                <img src="collage/white-cat-loaf-cat-loaf.gif" class="collage-item">
+                <img src="collage/wine-red-wine.gif" class="collage-item">
+                <img src="collage/470190108_1130239625114956_4058765204327594060_n.jpg" class="collage-item">
+            </div>
+
+            <button class="next-phase-btn visible" id="btnToLandscape"
+                style="margin-top: 40px; background: #87ceeb; color: #333;">Siguiente ➡</button>
+        </div>
+
+        <!-- Segment 2: Final Landscape -->
+        <div class="flork-segment" id="finalSeg" style="display: none;">
+            <p class="flork-text" style="font-size: 1.5rem; margin-bottom: 20px; color: #87ceeb;">
+                y bueno todo esto fue en tema celeste<br>
+                porque celeste es el cielo que tú y yo compartimos, eso siempre nos tendrá juntos...
+            </p>
+
+            <img src="videos_y_gifs/paisaje.png" class="landscape-img">
+
+            <div class="final-msg" style="margin-top: 40px;">
+                <p class="melon-text">GRACIAS POR TODO,</p>
+                <p class="melon-text">ATENTAMENTE TU CORAZON DE MELON 🍈❤️</p>
+            </div>
+
+            <p style="font-size: 0.8rem; opacity: 0.5; margin-top: 50px;">Fin.</p>
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         JAVASCRIPT
+         ============================================ -->
+    <script>
+        (() => {
+            'use strict';
+
+            /* ============================================
+               CONFIGURATION
+               ============================================ */
+            const CONFIG = {
+                LOADING_DURATION: 4000, // ms
+                CORRECT_ANSWER: 'companerita', // normalized (compañerita sin tilde)
+                MATRIX_FONT_SIZE: 14,
+                MATRIX_SPEED: 33, // ms per frame
+                HEART_PARTICLES_COUNT: 12,
+                CURSOR_TRAIL_COUNT: 5,
+            };
+
+            /* ============================================
+               MATRIX DIGITAL RAIN
+               ============================================ */
+            const canvas = document.getElementById('matrix-canvas');
+            const ctx = canvas.getContext('2d');
+
+            let columns, drops;
+
+            function initMatrix() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                columns = Math.floor(canvas.width / CONFIG.MATRIX_FONT_SIZE);
+                drops = Array.from({ length: columns }, () => Math.random() * -100);
+            }
+
+            // Matrix characters: hearts, katakana-like, and symbols
+            const matrixChars = '♥♡❤❣💕✦✧★☆♦♢◇◆▸▹►▻●○◐◑∞≈≋~∿⋆⊹✿❀♥ アイシテル0123456789ABCDEF';
+
+            function drawMatrix() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.font = `${CONFIG.MATRIX_FONT_SIZE}px 'Share Tech Mono', monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const char = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+                    const x = i * CONFIG.MATRIX_FONT_SIZE;
+                    const y = drops[i] * CONFIG.MATRIX_FONT_SIZE;
+
+                    // Varying cyan opacity for depth
+                    const brightness = Math.random();
+                    if (brightness > 0.95) {
+                        ctx.fillStyle = '#ffffff'; // bright flash
+                    } else if (brightness > 0.7) {
+                        ctx.fillStyle = 'rgba(0, 255, 255, 0.9)';
+                    } else if (brightness > 0.3) {
+                        ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
+                    } else {
+                        ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
+                    }
+
+                    ctx.fillText(char, x, y);
+
+                    if (y > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            initMatrix();
+            let matrixInterval = setInterval(drawMatrix, CONFIG.MATRIX_SPEED);
+
+            window.addEventListener('resize', () => {
+                initMatrix();
+            });
+
+            /* ============================================
+               FLOATING HEART PARTICLES
+               ============================================ */
+            function createHeartParticles() {
+                const hearts = ['♥', '♡', '❤', '💕', '✦'];
+                for (let i = 0; i < CONFIG.HEART_PARTICLES_COUNT; i++) {
+                    const heart = document.createElement('div');
+                    heart.classList.add('heart-particle');
+                    heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                    heart.style.left = `${Math.random() * 100}vw`;
+                    heart.style.fontSize = `${8 + Math.random() * 14}px`;
+                    heart.style.animationDuration = `${10 + Math.random() * 20}s`;
+                    heart.style.animationDelay = `${Math.random() * 15}s`;
+                    document.body.appendChild(heart);
+                }
+            }
+            createHeartParticles();
+
+            /* ============================================
+               CUSTOM CURSOR (Desktop only)
+               ============================================ */
+            const cursorEl = document.getElementById('cursor');
+            const trails = [];
+            let mouseX = -100, mouseY = -100;
+
+            if (window.innerWidth > 768) {
+                // Create trail elements
+                for (let i = 0; i < CONFIG.CURSOR_TRAIL_COUNT; i++) {
+                    const trail = document.createElement('div');
+                    trail.classList.add('cursor-trail');
+                    trail.style.opacity = (0.4 - i * 0.07).toString();
+                    trail.style.width = `${8 - i}px`;
+                    trail.style.height = `${8 - i}px`;
+                    document.body.appendChild(trail);
+                    trails.push({ el: trail, x: -100, y: -100 });
+                }
+
+                document.addEventListener('mousemove', (e) => {
+                    mouseX = e.clientX;
+                    mouseY = e.clientY;
+                    cursorEl.style.left = `${mouseX - 10}px`;
+                    cursorEl.style.top = `${mouseY - 10}px`;
+                });
+
+                // Trail animation loop
+                function updateTrails() {
+                    let prevX = mouseX, prevY = mouseY;
+                    for (const trail of trails) {
+                        const dx = prevX - trail.x;
+                        const dy = prevY - trail.y;
+                        trail.x += dx * 0.3;
+                        trail.y += dy * 0.3;
+                        trail.el.style.left = `${trail.x - 4}px`;
+                        trail.el.style.top = `${trail.y - 4}px`;
+                        prevX = trail.x;
+                        prevY = trail.y;
+                    }
+                    requestAnimationFrame(updateTrails);
+                }
+                updateTrails();
+            }
+
+            /* ============================================
+               PHASE MANAGEMENT
+               ============================================ */
+            const phases = {
+                loading: document.getElementById('phase-loading'),
+                question: document.getElementById('phase-question'),
+                success: document.getElementById('phase-success'),
+                heart: document.getElementById('phase-heart'),
+                heart: document.getElementById('phase-heart'),
+                story: document.getElementById('phase-story'),
+                vivencias: document.getElementById('phase-vivencias'),
+                recap: document.getElementById('phase-recap'),
+                recap: document.getElementById('phase-recap'),
+                flork: document.getElementById('phase-flork'),
+                admiration: document.getElementById('phase-admiration'),
+                beauty: document.getElementById('phase-beauty'),
+                final: document.getElementById('phase-final'),
+            };
+
+            const flash = document.getElementById('transitionFlash');
+
+            function switchPhase(from, to) {
+                // Flash effect
+                flash.classList.add('active');
+                setTimeout(() => flash.classList.remove('active'), 300);
+
+                // HIDE ALL PHASES to prevent overlap
+                Object.values(phases).forEach(p => {
+                    if (p) p.classList.add('hidden');
+                });
+
+                // Show new after small delay to allow hide to process
+                setTimeout(() => {
+                    to.classList.remove('hidden');
+                }, 300);
+            }
+
+            /* ============================================
+               PHASE 1 - LOADING SIMULATION
+               ============================================ */
+            const heartFill = document.getElementById('heartFill');
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            const loadingDetails = document.getElementById('loadingDetails');
+
+            const loadingMessages = [
+                'Inicializando protocolo amor...',
+                'Cargando recuerdos bonitos...',
+                'Preparando sorpresa...',
+                'Encriptando sentimientos...',
+                'Compilando te quieros...',
+                'Generando mariposas...',
+                'Sincronizando corazones...',
+                'Conectando almas...',
+                'Optimizando abrazos...',
+                'Finalizando...',
+            ];
+
+            let progress = 0;
+            let loadingMsgIndex = 0;
+
+            function updateLoading() {
+                const increment = (Math.random() * 3) + 0.5;
+                progress = Math.min(progress + increment, 100);
+                const p = Math.floor(progress);
+
+                heartFill.style.height = `${p}%`;
+                progressBar.style.width = `${p}%`;
+                progressPercent.textContent = `${p}%`;
+
+                // Update loading message
+                const targetMsgIndex = Math.floor((p / 100) * loadingMessages.length);
+                if (targetMsgIndex !== loadingMsgIndex && targetMsgIndex < loadingMessages.length) {
+                    loadingMsgIndex = targetMsgIndex;
+                    loadingDetails.textContent = loadingMessages[loadingMsgIndex];
+                }
+
+                if (progress >= 100) {
+                    progressPercent.textContent = '100%';
+                    loadingDetails.textContent = '¡Listo! ♥';
+                    setTimeout(() => {
+                        switchPhase(phases.loading, phases.question);
+                        initQuestionPhase();
+                    }, 800);
+                    return;
+                }
+
+                const delay = CONFIG.LOADING_DURATION / (100 / increment);
+                setTimeout(updateLoading, delay);
+            }
+
+            /* ============================================
+               PHASE 2 - QUESTION
+               ============================================ */
+            const questionText = document.getElementById('questionText');
+            const answerInput = document.getElementById('answerInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMsg = document.getElementById('errorMsg');
+
+            // Rotating error messages
+            const errorMessages = [
+                'Mmm... empieza con c',
+                'y termina con a jajaj',
+                'okey, ahora si va una verdadera pista: comp... ♥',
+            ];
+            let errorCount = 0;
+
+            const fullQuestion = 'Yo te he dicho que siempre serás mi...?';
+
+            function initQuestionPhase() {
+                // Typewriter effect for question
+                let charIndex = 0;
+                questionText.textContent = '';
+                questionText.style.opacity = '1';
+
+                function typeChar() {
+                    if (charIndex < fullQuestion.length) {
+                        questionText.textContent += fullQuestion[charIndex];
+                        charIndex++;
+                        setTimeout(typeChar, 50 + Math.random() * 40);
+                    }
+                }
+                setTimeout(typeChar, 600);
+
+                // Focus input after animation
+                setTimeout(() => {
+                    answerInput.focus();
+                }, 2000);
+            }
+
+            // Input interactions
+            answerInput.addEventListener('input', () => {
+                const hasText = answerInput.value.trim().length > 0;
+                submitBtn.disabled = !hasText;
+
+                if (hasText) {
+                    answerInput.classList.add('typing');
+                } else {
+                    answerInput.classList.remove('typing');
+                }
+
+                // Hide error when typing
+                errorMsg.classList.remove('visible');
+            });
+
+            answerInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !submitBtn.disabled) {
+                    checkAnswer();
+                }
+            });
+
+            submitBtn.addEventListener('click', checkAnswer);
+
+            // Normalize text: remove accents and convert to lowercase
+            function normalize(str) {
+                return str
+                    .toLowerCase()
+                    .trim()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '');
+            }
+
+            function checkAnswer() {
+                const answer = normalize(answerInput.value);
+                const correct = CONFIG.CORRECT_ANSWER;
+
+                if (answer === correct) {
+                    // Correct answer!
+                    switchPhase(phases.question, phases.success);
+                    celebrateSuccess();
+                } else {
+                    // Wrong answer - show rotating error messages
+                    const msgIndex = errorCount % errorMessages.length;
+                    errorMsg.textContent = errorMessages[msgIndex];
+                    errorCount++;
+
+                    answerInput.classList.add('shake');
+                    errorMsg.classList.add('visible');
+                    setTimeout(() => {
+                        answerInput.classList.remove('shake');
+                    }, 500);
+                    setTimeout(() => {
+                        errorMsg.classList.remove('visible');
+                    }, 2500);
+                }
+            }
+
+            /* ============================================
+               PHASE 3 - SUCCESS CELEBRATION
+               ============================================ */
+            function celebrateSuccess() {
+                // Burst of heart particles
+                for (let i = 0; i < 25; i++) {
+                    setTimeout(() => {
+                        const heart = document.createElement('div');
+                        heart.classList.add('heart-particle');
+                        heart.textContent = ['♥', '💕', '💖', '❤', '✨'][Math.floor(Math.random() * 5)];
+                        heart.style.left = `${Math.random() * 100}vw`;
+                        heart.style.opacity = '0.15';
+                        heart.style.fontSize = `${14 + Math.random() * 20}px`;
+                        heart.style.animationDuration = `${5 + Math.random() * 10}s`;
+                        heart.style.animationDelay = '0s';
+                        document.body.appendChild(heart);
+                    }, i * 100);
+                }
+
+                // After 5 seconds, fly out text and transition to heart phase
+                setTimeout(() => {
+                    const sHeart = document.getElementById('successHeart');
+                    const sText = document.getElementById('successText');
+                    const sSub = document.getElementById('successSub');
+
+                    // Fly elements out in different directions
+                    sHeart.classList.add('fly-out-up');
+                    setTimeout(() => sText.classList.add('fly-out-left'), 150);
+                    setTimeout(() => sSub.classList.add('fly-out-right'), 300);
+
+                    // After fly-out animation, switch to heart phase
+                    setTimeout(() => {
+                        switchPhase(phases.success, phases.heart);
+                        startHeartWordArt();
+                    }, 1500);
+                }, 5000);
+            }
+
+            /* ============================================
+               PHASE 4 - HEART ASCII ART ("compañerita")
+               ============================================ */
+            function startHeartWordArt() {
+                const hCanvas = document.getElementById('heartCanvas');
+                const hCtx = hCanvas.getContext('2d');
+
+                hCanvas.width = window.innerWidth;
+                hCanvas.height = window.innerHeight;
+
+                const word = 'compañerita';
+                // Fixed heart grid size for performance
+                const heartRows = 35;
+                const heartCols = 70;
+
+                // Calculate font size to fit heart nicely in screen
+                const maxFontW = Math.floor(hCanvas.width * 0.85 / heartCols);
+                const maxFontH = Math.floor(hCanvas.height * 0.8 / heartRows);
+                const fontSize = Math.max(8, Math.min(maxFontW * 1.6, maxFontH * 0.9, 16));
+
+                hCtx.font = `${fontSize}px 'Share Tech Mono', monospace`;
+                const charWidth = hCtx.measureText('m').width;
+                const lineHeight = fontSize + 3;
+
+                // Center the heart on screen
+                const totalW = heartCols * charWidth;
+                const totalH = heartRows * lineHeight;
+                const offsetX = (hCanvas.width - totalW) / 2;
+                const offsetY = (hCanvas.height - totalH) / 2;
+
+                // Build row strings - one string per row (key optimization)
+                // Heart eq: (x² + y² - 1)³ - x²y³ < 0, defined in ~[-1.3,1.3] x [-1.2,1.5]
+                const rowStrings = [];
+                const rowHasContent = [];
+                let wIdx = 0;
+
+                for (let r = 0; r < heartRows; r++) {
+                    let rowStr = '';
+                    let hasContent = false;
+                    for (let c = 0; c < heartCols; c++) {
+                        // Map grid to equation space directly
+                        const x = (c / heartCols - 0.5) * 2.8;
+                        const y = -((r / heartRows - 0.5) * 3.0 - 0.1);
+
+                        const a = x * x + y * y - 1;
+                        const inside = (a * a * a - x * x * y * y * y) < 0;
+
+                        if (inside) {
+                            rowStr += word[wIdx % word.length];
+                            wIdx++;
+                            hasContent = true;
+                        } else {
+                            rowStr += ' ';
+                        }
+                    }
+                    rowStrings.push(rowStr);
+                    rowHasContent.push(hasContent);
+                }
+
+                // === MATRIX RAIN ANIMATION that deposits characters into heart ===
+                // Build a per-cell grid to track which cells are "placed"
+                const placed = [];
+                for (let r = 0; r < heartRows; r++) {
+                    placed.push(new Array(heartCols).fill(false));
+                }
+
+                // Count total heart chars to know when done
+                let totalHeartChars = 0;
+                for (let r = 0; r < heartRows; r++) {
+                    for (let c = 0; c < heartCols; c++) {
+                        if (rowStrings[r][c] !== ' ') totalHeartChars++;
+                    }
+                }
+                let placedCount = 0;
+
+                // Create rain streams - staggered columns
+                const streams = [];
+                const maxActiveStreams = 8;
+                const colQueue = [];
+                // Shuffle columns for random arrival order
+                for (let c = 0; c < heartCols; c++) colQueue.push(c);
+                for (let i = colQueue.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [colQueue[i], colQueue[j]] = [colQueue[j], colQueue[i]];
+                }
+
+                let colIdx = 0;
+                const streamLength = 10;
+
+                function spawnStream() {
+                    if (colIdx >= colQueue.length) return;
+                    const col = colQueue[colIdx++];
+                    streams.push({
+                        col: col,
+                        headRow: -streamLength - Math.floor(Math.random() * 10),
+                        speed: 0.3 + Math.random() * 0.25,
+                        chars: []
+                    });
+                    for (let j = 0; j < streamLength; j++) {
+                        streams[streams.length - 1].chars.push(
+                            word[Math.floor(Math.random() * word.length)]
+                        );
+                    }
+                }
+
+                // Spawn initial batch
+                for (let i = 0; i < maxActiveStreams && i < heartCols; i++) spawnStream();
+
+                let animDone = false;
+                let flashAlpha = 0;
+
+                function drawFrame() {
+                    // Clear
+                    hCtx.fillStyle = '#000';
+                    hCtx.fillRect(0, 0, hCanvas.width, hCanvas.height);
+                    hCtx.font = `${fontSize}px 'Share Tech Mono', monospace`;
+
+                    // Update and draw rain streams
+                    for (let s = streams.length - 1; s >= 0; s--) {
+                        const st = streams[s];
+                        st.headRow += st.speed;
+
+                        // As the stream passes through heart rows, deposit characters
+                        for (let r = 0; r < heartRows; r++) {
+                            const ch = rowStrings[r][st.col];
+                            if (ch !== ' ' && !placed[r][st.col]) {
+                                // Place when stream head reaches or passes this row
+                                if (st.headRow >= r) {
+                                    placed[r][st.col] = true;
+                                    placedCount++;
+                                }
+                            }
+                        }
+
+                        // Draw the falling stream tail
+                        for (let j = 0; j < streamLength; j++) {
+                            const drawRow = Math.floor(st.headRow) - j;
+                            if (drawRow < -2 || drawRow > heartRows + 5) continue;
+
+                            const screenX = offsetX + st.col * charWidth;
+                            const screenY = offsetY + drawRow * lineHeight + lineHeight;
+
+                            if (screenY < 0 || screenY > hCanvas.height + 20) continue;
+
+                            // Head char is brightest
+                            const brightness = j === 0 ? 1.0 : Math.max(0.05, (1 - j / streamLength) * 0.5);
+                            if (j === 0) {
+                                hCtx.fillStyle = `rgba(200, 255, 255, ${brightness})`;
+                            } else {
+                                hCtx.fillStyle = `rgba(0, 255, 255, ${brightness})`;
+                            }
+                            hCtx.fillText(st.chars[j], screenX, screenY);
+                        }
+
+                        // Remove stream when it's past the grid
+                        if (st.headRow > heartRows + streamLength + 2) {
+                            streams.splice(s, 1);
+                            spawnStream(); // replace with next column
+                        }
+                    }
+
+                    // Draw all placed (permanent) heart characters
+                    // Optimization: build and draw row strings for placed chars
+                    for (let r = 0; r < heartRows; r++) {
+                        if (!rowHasContent[r]) continue;
+                        let hasAny = false;
+                        let rowStr = '';
+                        for (let c = 0; c < heartCols; c++) {
+                            if (placed[r][c] && rowStrings[r][c] !== ' ') {
+                                rowStr += rowStrings[r][c];
+                                hasAny = true;
+                            } else {
+                                rowStr += ' ';
+                            }
+                        }
+                        if (hasAny) {
+                            hCtx.fillStyle = 'rgba(0, 255, 255, 0.9)';
+                            hCtx.fillText(rowStr, offsetX, offsetY + r * lineHeight + lineHeight);
+                        }
+                    }
+
+                    // Check completion
+                    if (placedCount >= totalHeartChars && !animDone) {
+                        animDone = true;
+                        flashAlpha = 0.6;
+                    }
+
+                    // Flash effect on completion
+                    if (flashAlpha > 0.01) {
+                        hCtx.fillStyle = `rgba(0, 255, 255, ${flashAlpha})`;
+                        hCtx.fillRect(0, 0, hCanvas.width, hCanvas.height);
+                        flashAlpha *= 0.88;
+                    }
+
+                    if (animDone && flashAlpha <= 0.01) {
+                        // Final static render and STOP
+                        drawFinalFrame();
+                        return;
+                    }
+
+                    requestAnimationFrame(drawFrame);
+                }
+
+                function drawFinalFrame() {
+                    hCtx.fillStyle = '#000';
+                    hCtx.fillRect(0, 0, hCanvas.width, hCanvas.height);
+
+                    hCtx.font = `${fontSize}px 'Share Tech Mono', monospace`;
+                    hCtx.fillStyle = 'rgba(0, 255, 255, 0.9)';
+
+                    for (let r = 0; r < heartRows; r++) {
+                        if (!rowHasContent[r]) continue;
+                        hCtx.fillText(rowStrings[r], offsetX, offsetY + r * lineHeight + lineHeight);
+                    }
+                    // Done! Transition to story phase after a pause
+                    setTimeout(() => {
+                        switchPhase(phases.heart, phases.story);
+                        setTimeout(() => startStoryPhase(), 800);
+                    }, 3000);
+                }
+
+                requestAnimationFrame(drawFrame);
+            }
+
+            /* ============================================
+               PHASE 5 - STORY / FORTNITE
+               ============================================ */
+            function startStoryPhase() {
+                const line1 = document.getElementById('storyLine1');
+                const line2 = document.getElementById('storyLine2');
+                const fortniteTitle = document.getElementById('storyFortniteTitle');
+                const videoContainer = document.getElementById('storyVideoContainer');
+                const video = document.getElementById('storyVideo');
+
+                // Timeline: reveal elements one by one
+                // Line 1: "Todo empezó un día que nos conocimos..."
+                setTimeout(() => {
+                    line1.classList.add('visible');
+                }, 300);
+
+                // Line 2: "Y empezamos en el juego que me ha dado muchas cosas..."
+                setTimeout(() => {
+                    line2.classList.add('visible');
+                }, 2500);
+
+                // Dramatic pause... then FORTNITE explodes in
+                setTimeout(() => {
+                    fortniteTitle.classList.add('visible');
+                }, 5000);
+
+                // Video appears right after
+                setTimeout(() => {
+                    videoContainer.classList.add('visible');
+                    video.play().catch(() => { });
+                }, 5800);
+
+                // Transition to Phase 6 after enjoying the video
+                setTimeout(() => {
+                    switchPhase(phases.story, phases.vivencias);
+                    setTimeout(() => startVivenciasPhase(), 800);
+                }, 14000);
+            }
+
+            /* ============================================
+               PHASE 6 - VIVENCIAS / DEDICATORIA
+               ============================================ */
+            function startVivenciasPhase() {
+                const t1 = document.getElementById('vivText1');
+                const t2 = document.getElementById('vivText2');
+                const t3 = document.getElementById('vivText3');
+                const asciiC = document.getElementById('vivAsciiContainer');
+                const t4 = document.getElementById('vivText4');
+                const michiImg = document.getElementById('vivMichiImg');
+
+                // Text 1: "Quién diría..." - 3s to appear
+                setTimeout(() => t1.classList.add('visible'), 300);
+
+                // Text 2: "Sin embargo..." + gato sticker - 4s to appear
+                setTimeout(() => t2.classList.add('visible'), 4000);
+
+                // Text 3: "Este detalle..." - 3s to appear
+                setTimeout(() => t3.classList.add('visible'), 8000);
+
+                // ASCII art - appears after text 3
+                setTimeout(() => {
+                    asciiC.classList.add('visible');
+                    startVivAsciiReveal();
+                }, 10000);
+
+                // Text 4 + michi gif - 4s after animation starts
+                setTimeout(() => t4.classList.add('visible'), 16000);
+                setTimeout(() => michiImg.classList.add('visible'), 17000);
+            }
+
+            // ASCII art character-by-character reveal
+            function startVivAsciiReveal() {
+                const art = document.getElementById('vivAsciiArt');
+                const asciiLines = [
+                    '───▄▀▀▀▄▄▄▄▄▄▄▀▀▀▄───',
+                    '───█▒▒░░░░░░░░░▒▒█───',
+                    '────█░░█░░░░░█░░█────',
+                    '─▄▄──█░░░▀█▀░░░█──▄▄─',
+                    '█░░█─▀▄░░░░░░░▄▀─█░░█',
+                ];
+
+                art.innerHTML = '';
+                const allChars = [];
+
+                asciiLines.forEach((line, lineIdx) => {
+                    for (let i = 0; i < line.length; i++) {
+                        const span = document.createElement('span');
+                        span.className = 'ascii-char';
+                        span.textContent = line[i];
+                        art.appendChild(span);
+                        allChars.push(span);
+                    }
+                    if (lineIdx < asciiLines.length - 1) {
+                        art.appendChild(document.createTextNode('\n'));
+                    }
+                });
+
+                // Reveal char by char
+                allChars.forEach((span, i) => {
+                    setTimeout(() => span.classList.add('show'), i * 30);
+                });
+
+                // --- Transition to Phase 7 (Recap) ---
+                // Wait for michi gif (18s) + a few seconds reading time = 24s total from start
+                setTimeout(() => {
+                    switchPhase(phases.vivencias, phases.recap);
+                    setTimeout(() => startRecapPhase(), 800);
+                }, 24000);
+            }
+
+            /* ============================================
+               PHASE 7 - RECAP MUSICAL
+               ============================================ */
+            function startRecapPhase() {
+                // Sequence of slides
+                // Slide 1: Remy Zero (Save Me) - 13s
+                // Pista 1 keeps playing until text line triggers Pista 2
+                runRecapSlide1();
+
+                // Slide 2: Humbe (Tu Valor) - starts at 20s
+                setTimeout(() => {
+                    runRecapSlide2();
+                }, 20000);
+
+                // Slide 3: PXNDX - starts at 40s
+                setTimeout(() => {
+                    runRecapSlide3();
+                }, 40000);
+
+                // Slide 4: Yonaguni - starts at 60s
+                setTimeout(() => {
+                    runRecapSlide4();
+                }, 60000);
+
+                // Slide 5: Baile Inolvidable - starts at 80s (LOOP)
+                setTimeout(() => {
+                    runRecapSlide5();
+                }, 80000);
+            }
+
+            function playRecapAudio(src) {
+                const bgAudio = document.getElementById('bgAudio');
+                // Crossfade attempt (simple volume cut)
+                bgAudio.volume = 0;
+                setTimeout(() => {
+                    bgAudio.src = src;
+                    bgAudio.play().then(() => {
+                        // Fade in
+                        let vol = 0;
+                        const fade = setInterval(() => {
+                            vol += 0.1;
+                            if (vol >= 0.5) { // Max volume 50%
+                                vol = 0.5;
+                                clearInterval(fade);
+                            }
+                            bgAudio.volume = vol;
+                        }, 100);
+                    }).catch(e => console.log("Audio play error", e));
+                }, 500);
+            }
+
+            // Helper to hide previous slide and show new one
+            function transitionSlide(hideId, showId) {
+                if (hideId) {
+                    const el = document.getElementById(hideId);
+                    el.style.opacity = '0';
+                    setTimeout(() => el.style.display = 'none', 800);
+                }
+                if (showId) {
+                    const el = document.getElementById(showId);
+                    setTimeout(() => {
+                        el.classList.add('visible');
+                    }, 800);
+                }
+            }
+
+            function runRecapSlide1() {
+                const s = document.getElementById('recapSlide1');
+                s.classList.add('visible');
+                // Text 1: 2s
+                setTimeout(() => document.getElementById('rs1_t1').classList.add('visible'), 2000);
+                // Text 2: 8s (Wait for "jejeje") -> Trigger Audio 2
+                setTimeout(() => {
+                    document.getElementById('rs1_t2').classList.add('visible');
+                    playRecapAudio('audio/pista2.mp3');
+                }, 8000);
+                // Song Info + Image appearing
+                setTimeout(() => {
+                    document.getElementById('rs1_info').classList.add('visible');
+                    document.getElementById('rs1_img').classList.add('visible');
+                }, 10000);
+                // Text 3: 14s
+                setTimeout(() => document.getElementById('rs1_t3').classList.add('visible'), 14000);
+            }
+
+            function runRecapSlide2() {
+                transitionSlide('recapSlide1', 'recapSlide2');
+                // Text 1: 2.5s (after slide visible)
+                setTimeout(() => document.getElementById('rs2_t1').classList.add('visible'), 2500);
+                // Text 2: 8.5s
+                setTimeout(() => document.getElementById('rs2_t2').classList.add('visible'), 8500);
+                // Text 3: 14.5s (Wait for "verdadero:") -> Trigger Audio 3
+                setTimeout(() => {
+                    document.getElementById('rs2_t3').classList.add('visible');
+                    playRecapAudio('audio/pista3.mp3');
+                }, 14500);
+                // Song Info + Image
+                setTimeout(() => {
+                    document.getElementById('rs2_info').classList.add('visible');
+                    document.getElementById('rs2_img').classList.add('visible');
+                }, 16500);
+            }
+
+            function runRecapSlide3() {
+                transitionSlide('recapSlide2', 'recapSlide3');
+                // Text 1: 2.5s
+                setTimeout(() => document.getElementById('rs3_t1').classList.add('visible'), 2500);
+                // Text 2: 8.5s
+                setTimeout(() => document.getElementById('rs3_t2').classList.add('visible'), 8500);
+                // Text 3: 14.5s (Wait for "eso...") -> Trigger Audio 4
+                setTimeout(() => {
+                    document.getElementById('rs3_t3').classList.add('visible');
+                    playRecapAudio('audio/pista4.mp3');
+                }, 14500);
+                // Song Info + Image
+                setTimeout(() => {
+                    document.getElementById('rs3_info').classList.add('visible');
+                    document.getElementById('rs3_img').classList.add('visible');
+                }, 16500);
+            }
+
+            function runRecapSlide4() {
+                transitionSlide('recapSlide3', 'recapSlide4');
+                // Text 1: 2.5s
+                setTimeout(() => document.getElementById('rs4_t1').classList.add('visible'), 2500);
+                // Text 2: 8.5s
+                setTimeout(() => document.getElementById('rs4_t2').classList.add('visible'), 8500);
+                // Text 3: 14.5s (Wait for "podamos:") -> Trigger Audio 5
+                setTimeout(() => {
+                    document.getElementById('rs4_t3').classList.add('visible');
+                    playRecapAudio('audio/pista5.mp3');
+                }, 14500);
+                // Song Info + Image
+                setTimeout(() => {
+                    document.getElementById('rs4_info').classList.add('visible');
+                    document.getElementById('rs4_img').classList.add('visible');
+                }, 16500);
+            }
+
+            function runRecapSlide5() {
+                transitionSlide('recapSlide4', 'recapSlide5');
+                // Text 1: 2.5s
+                setTimeout(() => document.getElementById('rs5_t1').classList.add('visible'), 2500);
+                // Text 2: 8.5s
+                setTimeout(() => document.getElementById('rs5_t2').classList.add('visible'), 8500);
+                // Text 3: 14.5s (Wait for "mi:") -> Trigger Audio 6
+                setTimeout(() => {
+                    document.getElementById('rs5_t3').classList.add('visible');
+                    playRecapAudio('audio/pista6.mp3');
+                }, 14500);
+                // Song Info + Image
+                setTimeout(() => {
+                    document.getElementById('rs5_info').classList.add('visible');
+                    document.getElementById('rs5_img').classList.add('visible');
+                    // Show button to next phase after a while
+                    setTimeout(() => document.getElementById('btnToPhase8').classList.add('visible'), 5000);
+                }, 16500);
+            }
+
+            /* ============================================
+               PHASE 8 - FLORK & QUIZ LOGIC
+               ============================================ */
+            function goToPhase8() {
+                switchPhase(phases.recap, phases.flork);
+                setTimeout(() => {
+                    document.getElementById('florkSeg1').classList.add('visible');
+                }, 500);
+            }
+
+            function nextFlorkSegment(currentSegImg) {
+                // Hide Seg 1, Show Seg 2
+                if (currentSegImg === 1) {
+                    document.getElementById('florkSeg1').style.display = 'none';
+                    document.getElementById('florkSeg2').classList.add('visible');
+                    // Start Pista 7 here
+                    playRecapAudio('audio/pista7.mp3');
+                }
+            }
+
+            function checkQuiz(val) {
+                if (val === 400) {
+                    // Correct!
+                    document.getElementById('florkSeg2').style.display = 'none';
+                    const seg3 = document.getElementById('florkSeg3');
+                    seg3.style.display = 'block'; // Ensure block display
+                    setTimeout(() => seg3.classList.add('visible'), 50); // Small delay for transition
+
+                    // Optional: Confetti or sound?
+                } else {
+                    // Incorrect!
+                    const fb = document.getElementById('quizFeedback');
+                    fb.classList.add('visible');
+                    setTimeout(() => {
+                        fb.classList.remove('visible');
+                    }, 2500);
+                }
+            }
+
+            /* ============================================
+               PHASE 9 - ADMIRATION & NARUTO LOGIC
+               ============================================ */
+            function startAdmirationPhase() {
+                switchPhase(phases.flork, phases.admiration);
+
+                // Pista 7 already playing since Quiz
+
+                // Reveal items sequentially
+                setTimeout(() => document.getElementById('admItem1').classList.add('visible'), 1000);
+                setTimeout(() => document.getElementById('admItem2').classList.add('visible'), 3000);
+                setTimeout(() => document.getElementById('admItem3').classList.add('visible'), 5000);
+
+                // Reveal special quote
+                setTimeout(() => document.getElementById('admQuote').classList.add('visible'), 7000);
+            }
+
+            function runNarutoSequence() {
+                // Switch segments within phase
+                document.getElementById('admirationSeg1').style.display = 'none';
+                const narutoSeg = document.getElementById('narutoSeg');
+                narutoSeg.style.display = 'block'; // Make container visible
+                narutoSeg.classList.add('visible');
+
+                // Sequence with delays
+                // Text 1
+                setTimeout(() => {
+                    document.getElementById('narutoText1').style.opacity = 1;
+                }, 1000);
+
+                // Text 2
+                setTimeout(() => {
+                    document.getElementById('narutoText2').style.opacity = 1;
+                }, 3500);
+
+                // DE VERAS + Audio
+                setTimeout(() => {
+                    document.getElementById('narutoBigText').style.opacity = 1;
+                    document.getElementById('narutoGif').style.opacity = 1;
+
+                    // Audio Logic
+                    const bgAudio = document.getElementById('bgAudio');
+                    bgAudio.pause();
+
+                    const sfx = new Audio('audio/De veras (mp3cut.net).mp3');
+                    sfx.volume = 1.0;
+
+                    sfx.onended = () => {
+                        bgAudio.play().catch(e => console.log("Resume audio error", e));
+                        // Show next button only after audio ends
+                        document.getElementById('btnToPhase10').style.display = 'inline-block';
+                    };
+
+                    sfx.play().catch(e => console.log("SFX play error", e));
+
+                }, 6500); // 6.5s delay
+            }
+
+            /* ============================================
+               PHASE 10 - BEAUTY & CLAVELES LOGIC
+               ============================================ */
+            function startBeautyPhase() {
+                switchPhase(phases.admiration, phases.beauty);
+                // Pista 7 continues or resumes if it was paused
+            }
+
+            function runFlowersSequence() {
+                // Hide beauty, show flowers
+                document.getElementById('beautySeg1').style.display = 'none';
+                document.getElementById('flowersSeg').style.display = 'flex'; // flex for column layout
+
+                // Audio Logic: Switch to Pista 8
+                playRecapAudio('audio/pista8.mp3');
+            }
+
+            /* ============================================
+               PHASE 11 - COLLAGE & FINAL LOGIC
+               ============================================ */
+            function startFinalPhase() {
+                switchPhase(phases.beauty, phases.final);
+                // Force show collage segment (it was hidden by default .flork-segment css)
+                const collage = document.getElementById('collageSeg');
+                if (collage) {
+                    collage.style.display = 'block';
+                    collage.classList.add('visible');
+                }
+                // Keep Pista 8 playing
+            }
+
+            function showFinalMessage() {
+                document.getElementById('collageSeg').style.display = 'none';
+                document.getElementById('finalSeg').style.display = 'flex'; // flex column
+            }
+
+            // Event Listeners for Phase 8, 9, 10 and 11
+            // Using try-catch to avoid blocking if elements are missing during dev
+            try {
+                // Phase 8
+                const btnPhase8 = document.getElementById('btnToPhase8');
+                if (btnPhase8) btnPhase8.addEventListener('click', goToPhase8);
+
+                const btnFlork1 = document.getElementById('btnFlorkNext1');
+                if (btnFlork1) btnFlork1.addEventListener('click', () => nextFlorkSegment(1));
+
+                const q350 = document.getElementById('btnQuiz350');
+                if (q350) q350.addEventListener('click', () => checkQuiz(350));
+
+                const q500 = document.getElementById('btnQuiz500');
+                if (q500) q500.addEventListener('click', () => checkQuiz(500));
+
+                const q400 = document.getElementById('btnQuiz400');
+                if (q400) q400.addEventListener('click', () => checkQuiz(400));
+
+                /* Phase 9 Listeners */
+                const btnPhase9 = document.getElementById('btnToPhase9');
+                if (btnPhase9) btnPhase9.addEventListener('click', () => { console.log('Starting Phase 9'); startAdmirationPhase(); });
+
+                const btnNaruto = document.getElementById('btnToNaruto');
+                if (btnNaruto) btnNaruto.addEventListener('click', () => { console.log('Starting Naruto'); runNarutoSequence(); });
+
+                /* Phase 10 Listeners */
+                const btnPhase10 = document.getElementById('btnToPhase10');
+                if (btnPhase10) btnPhase10.addEventListener('click', () => { console.log('Starting Phase 10'); startBeautyPhase(); });
+
+                const btnFlowers = document.getElementById('btnToFlowers');
+                if (btnFlowers) btnFlowers.addEventListener('click', () => { console.log('Starting Flowers'); runFlowersSequence(); });
+
+                /* Phase 11 Listeners */
+                const btnFinal = document.getElementById('btnToFinal');
+                if (btnFinal) btnFinal.addEventListener('click', () => { console.log('Starting Final'); startFinalPhase(); });
+
+                const btnLandscape = document.getElementById('btnToLandscape');
+                if (btnLandscape) btnLandscape.addEventListener('click', () => { console.log('Show Landscape'); showFinalMessage(); });
+
+            } catch (e) { console.error("Event binding error", e); }
+
+            /* ============================================
+               INITIALIZATION - Always starts fresh
+               ============================================ */
+            // Loading starts after user clicks the audio overlay
+            // (see audio management section below)
+
+            /* ============================================
+               PERIODIC GLITCH EFFECT ON All TEXT
+               ============================================ */
+            function randomGlitch() {
+                const elements = document.querySelectorAll('.question-text, .loading-text, .success-text');
+                const el = elements[Math.floor(Math.random() * elements.length)];
+                if (el) {
+                    el.style.animation = 'none';
+                    el.offsetHeight; // trigger reflow
+                    el.style.animation = 'glitchText 0.3s ease';
+                    setTimeout(() => {
+                        el.style.animation = '';
+                    }, 300);
+                }
+                setTimeout(randomGlitch, 3000 + Math.random() * 5000);
+            }
+            setTimeout(randomGlitch, 5000);
+
+            /* ============================================
+               AUDIO MANAGEMENT SYSTEM
+               ============================================ */
+            const bgAudio = document.getElementById('bgAudio');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumeBtn = document.getElementById('volumeBtn');
+            const volumePercent = document.getElementById('volumePercent');
+            const audioStartOverlay = document.getElementById('audioStartOverlay');
+            const audioStartBtn = document.getElementById('audioStartBtn');
+
+            let isMuted = false;
+            let lastVolume = 0.5;
+
+            // Set initial volume to 50%
+            bgAudio.volume = 0.5;
+
+            // Audio start handler + start the experience
+            function startExperience() {
+                bgAudio.play().then(() => {
+                    audioStartOverlay.classList.add('hidden');
+                    setTimeout(() => {
+                        audioStartOverlay.style.display = 'none';
+                    }, 500);
+                }).catch(() => {
+                    // Fallback: hide overlay anyway
+                    audioStartOverlay.classList.add('hidden');
+                });
+                // Start loading simulation
+                setTimeout(updateLoading, 300);
+            }
+
+            audioStartBtn.addEventListener('click', startExperience);
+            audioStartBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                startExperience();
+            });
+
+            // Volume slider
+            volumeSlider.addEventListener('input', () => {
+                const vol = volumeSlider.value / 100;
+                bgAudio.volume = vol;
+                lastVolume = vol;
+                isMuted = vol === 0;
+                updateVolumeIcon(vol);
+                volumePercent.textContent = `${volumeSlider.value}%`;
+            });
+
+            // Mute/unmute button
+            volumeBtn.addEventListener('click', () => {
+                isMuted = !isMuted;
+                if (isMuted) {
+                    lastVolume = bgAudio.volume || lastVolume;
+                    bgAudio.volume = 0;
+                    volumeSlider.value = 0;
+                    volumePercent.textContent = '0%';
+                } else {
+                    bgAudio.volume = lastVolume;
+                    volumeSlider.value = Math.round(lastVolume * 100);
+                    volumePercent.textContent = `${Math.round(lastVolume * 100)}%`;
+                }
+                updateVolumeIcon(bgAudio.volume);
+            });
+
+            function updateVolumeIcon(vol) {
+                if (vol === 0) {
+                    volumeBtn.textContent = '🔇';
+                } else if (vol < 0.35) {
+                    volumeBtn.textContent = '🔈';
+                } else if (vol < 0.7) {
+                    volumeBtn.textContent = '🔉';
+                } else {
+                    volumeBtn.textContent = '🔊';
+                }
+            }
+
+            // Global audio API for future use:
+            // To change track: window.audioManager.changeTrack('audio/pista2.mp3')
+            // To set volume: window.audioManager.setVolume(0.7)
+            window.audioManager = {
+                audio: bgAudio,
+                changeTrack(src) {
+                    bgAudio.pause();
+                    bgAudio.querySelector('source').src = src;
+                    bgAudio.load();
+                    bgAudio.play().catch(() => { });
+                },
+                setVolume(vol) {
+                    bgAudio.volume = vol;
+                    volumeSlider.value = Math.round(vol * 100);
+                    volumePercent.textContent = `${Math.round(vol * 100)}%`;
+                    updateVolumeIcon(vol);
+                    lastVolume = vol;
+                },
+                fadeToTrack(src, duration = 1000) {
+                    const startVol = bgAudio.volume;
+                    const steps = 20;
+                    const stepTime = duration / 2 / steps;
+                    let step = 0;
+                    // Fade out
+                    const fadeOut = setInterval(() => {
+                        step++;
+                        bgAudio.volume = Math.max(0, startVol * (1 - step / steps));
+                        if (step >= steps) {
+                            clearInterval(fadeOut);
+                            bgAudio.querySelector('source').src = src;
+                            bgAudio.load();
+                            bgAudio.play().catch(() => { });
+                            // Fade in
+                            let stepIn = 0;
+                            const fadeIn = setInterval(() => {
+                                stepIn++;
+                                bgAudio.volume = Math.min(startVol, startVol * (stepIn / steps));
+                                if (stepIn >= steps) {
+                                    clearInterval(fadeIn);
+                                    bgAudio.volume = startVol;
+                                }
+                            }, stepTime);
+                        }
+                    }, stepTime);
+                },
+            };
+
+        })();
+    </script>
+</body>
+
+</html>
